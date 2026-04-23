@@ -33,8 +33,13 @@ server.register(multipart);
 
 server.decorate("authenticate", authenticate);
 
+import uploadRoutes from "./routes/upload.routes";
+
+// ... existing code ...
+
 server.register(authRoutes, { prefix: "/api/auth" });
 server.register(accountRoutes, { prefix: "/api/accounts" });
+server.register(uploadRoutes, { prefix: "/api/uploads" });
 
 server.get("/health", async () => ({ status: "ok" }));
 
