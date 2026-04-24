@@ -50,6 +50,7 @@ import seatRoutes from "./routes/seat.routes";
 import waitlistRoutes from "./routes/waitlist.routes";
 import physicalRoutes from "./routes/physical.routes";
 import planningRoutes from "./routes/planning.routes";
+import aiRoutes from "./routes/ai.routes";
 
 server.register(authRoutes, { prefix: "/api/auth" });
 server.register(accountRoutes, { prefix: "/api/accounts" });
@@ -65,6 +66,7 @@ server.register(seatRoutes, { prefix: "/api/seats" });
 server.register(waitlistRoutes, { prefix: "/api/waitlist" });
 server.register(physicalRoutes, { prefix: "/api/physical" });
 server.register(planningRoutes, { prefix: "/api/planning" });
+server.register(aiRoutes, { prefix: "/api/ai" });
 server.register(staticRoutes);
 
 server.get("/health", async () => ({ status: "ok" }));

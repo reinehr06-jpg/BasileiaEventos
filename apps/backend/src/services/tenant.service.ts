@@ -205,6 +205,42 @@ CREATE TABLE IF NOT EXISTS event_suppliers (
   status VARCHAR(50) DEFAULT 'proposed', -- 'proposed', 'confirmed', 'paid'
   created_at TIMESTAMP DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS pricing_suggestions (
+  id SERIAL PRIMARY KEY,
+  event_id VARCHAR(255) REFERENCES events(id),
+  ticket_lot_id VARCHAR(255) REFERENCES ticket_lots(id),
+  suggested_price DECIMAL(10,2) NOT NULL,
+  reason TEXT,
+  status VARCHAR(50) DEFAULT 'pending', -- 'pending', 'accepted', 'adjusted', 'ignored'
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS ab_tests (
+  id VARCHAR(255) PRIMARY KEY,
+  ticket_type_id VARCHAR(255) REFERENCES ticket_types(id),
+  status VARCHAR(50) DEFAULT 'active', -- 'active', 'finished'
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS ab_test_variants (
+  id VARCHAR(255) PRIMARY KEY,
+  test_id VARCHAR(255) REFERENCES ab_tests(id),
+  name VARCHAR(50) NOT NULL, -- 'A', 'B'
+  price DECIMAL(10,2) NOT NULL,
+  views INTEGER DEFAULT 0,
+  conversions INTEGER DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS chatbot_conversations (
+  id VARCHAR(255) PRIMARY KEY,
+  event_id VARCHAR(255) REFERENCES events(id),
+  visitor_id VARCHAR(255) NOT NULL,
+  history JSONB,
+  converted BOOLEAN DEFAULT false,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
 `;
 
 export async function createTenantDatabase(dbName: string) {

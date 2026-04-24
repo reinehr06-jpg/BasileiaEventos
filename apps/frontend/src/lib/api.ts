@@ -91,3 +91,11 @@ export const planningApi = {
   getFinanceSummary: (eventId: string) => apiFetch(`/api/planning/finance/${eventId}`, { headers: getHeaders() }),
   exportToFinance: (eventId: string) => apiFetch(`/api/planning/finance/${eventId}/export`, { method: "POST", headers: getHeaders() }),
 };
+
+export const aiApi = {
+  sendMessage: (data: { eventId: string; visitorId: string; message: string }) => apiFetch("/api/ai/chatbot/message", { method: "POST", body: JSON.stringify(data), headers: getHeaders() }),
+  analyzePricing: (eventId: string) => apiFetch(`/api/ai/pricing/analyze/${eventId}`, { method: "POST", headers: getHeaders() }),
+  getPricingSuggestions: (eventId: string) => apiFetch(`/api/ai/pricing/suggestions/${eventId}`, { headers: getHeaders() }),
+  startABTest: (data: any) => apiFetch("/api/ai/abtest/start", { method: "POST", body: JSON.stringify(data), headers: getHeaders() }),
+  getABTestResults: (testId: string) => apiFetch(`/api/ai/abtest/${testId}/results`, { headers: getHeaders() }),
+};
