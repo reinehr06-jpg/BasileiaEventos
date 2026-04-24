@@ -47,6 +47,10 @@ export default async function checkinRoutes(server: FastifyInstance) {
          JOIN tickets t ON cl.ticket_id = t.id 
          JOIN ticket_types tt ON t.ticket_type_id = tt.id 
          WHERE tt.event_id = $1 AND cl.status = 'valid') as entries,
+        (SELECT count(*) FROM checkin_logs cl 
+         JOIN tickets t ON cl.ticket_id = t.id 
+         JOIN ticket_types tt ON t.ticket_type_id = tt.id 
+         WHERE tt.event_id = $1 AND cl.status = 'fraud') as fraud_alerts,
         (SELECT count(*) FROM tickets t 
          JOIN ticket_types tt ON t.ticket_type_id = tt.id 
          WHERE tt.event_id = $1) as total_capacity
@@ -55,7 +59,7 @@ export default async function checkinRoutes(server: FastifyInstance) {
     );
 
     const recentEntries = await request.tenantDb.query(
-      `SELECT cl.created_at, cl.status, t.code, tt.name as type_name
+      `SELECT cl.created_at, cl.status, t.code, tt.name as type_name, cl.message
        FROM checkin_logs cl
        JOIN tickets t ON cl.ticket_id = t.id
        JOIN ticket_types tt ON t.ticket_type_id = tt.id

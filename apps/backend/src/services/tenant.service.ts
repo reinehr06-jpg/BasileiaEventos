@@ -7,7 +7,8 @@ CREATE TABLE IF NOT EXISTS users (
   id VARCHAR(255) PRIMARY KEY,
   email VARCHAR(255) UNIQUE NOT NULL,
   name VARCHAR(255) NOT NULL,
-  role VARCHAR(50) DEFAULT 'user',
+  role VARCHAR(50) DEFAULT 'user', -- 'admin', 'porteiro', 'user'
+  restricted_zone_id VARCHAR(255), -- If role is porteiro, they might be locked to a zone
   active BOOLEAN DEFAULT true,
   created_at TIMESTAMP DEFAULT NOW()
 );
@@ -20,6 +21,7 @@ CREATE TABLE IF NOT EXISTS events (
   start_date TIMESTAMP NOT NULL,
   end_date TIMESTAMP,
   status VARCHAR(50) DEFAULT 'draft',
+  facial_enabled BOOLEAN DEFAULT false,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -49,18 +51,6 @@ CREATE TABLE IF NOT EXISTS orders (
   created_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS tickets (
-  id VARCHAR(255) PRIMARY KEY,
-  order_id VARCHAR(255) REFERENCES orders(id),
-  ticket_type_id VARCHAR(255) REFERENCES ticket_types(id),
-  lot_id VARCHAR(255) REFERENCES ticket_lots(id),
-  user_id VARCHAR(255) REFERENCES users(id),
-  code VARCHAR(100) UNIQUE NOT NULL,
-  qr_token VARCHAR(255) UNIQUE,
-  status VARCHAR(50) DEFAULT 'active',
-  created_at TIMESTAMP DEFAULT NOW()
-);
-
 CREATE TABLE IF NOT EXISTS ticket_lots (
   id VARCHAR(255) PRIMARY KEY,
   ticket_type_id VARCHAR(255) REFERENCES ticket_types(id),
@@ -71,6 +61,20 @@ CREATE TABLE IF NOT EXISTS ticket_lots (
   payment_link TEXT,
   auto_open_at_percent INTEGER DEFAULT 90,
   active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS tickets (
+  id VARCHAR(255) PRIMARY KEY,
+  order_id VARCHAR(255) REFERENCES orders(id),
+  ticket_type_id VARCHAR(255) REFERENCES ticket_types(id),
+  lot_id VARCHAR(255) REFERENCES ticket_lots(id),
+  user_id VARCHAR(255) REFERENCES users(id),
+  code VARCHAR(100) UNIQUE NOT NULL,
+  qr_token VARCHAR(255) UNIQUE,
+  face_id VARCHAR(255),
+  facial_status VARCHAR(50) DEFAULT 'not_required', -- 'not_required', 'pending', 'approved'
+  status VARCHAR(50) DEFAULT 'active',
   created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -103,10 +107,102 @@ CREATE TABLE IF NOT EXISTS checkin_logs (
   id SERIAL PRIMARY KEY,
   ticket_id VARCHAR(255) REFERENCES tickets(id),
   user_id VARCHAR(255),
-  status VARCHAR(50) NOT NULL, -- 'valid', 'already_used', 'invalid', 'fraud'
+  status VARCHAR(50) NOT NULL, -- 'valid', 'already_used', 'invalid', 'fraud', 'error'
+  message TEXT, -- Fraud details or error messages
   device_fingerprint VARCHAR(255),
   ip VARCHAR(50),
   geolocation JSONB,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+CREATE TABLE IF NOT EXISTS tracking_links (
+  id VARCHAR(255) PRIMARY KEY,
+  event_id VARCHAR(255) REFERENCES events(id),
+  name VARCHAR(255) NOT NULL, -- ex: "Instagram Bio"
+  utm_source VARCHAR(100),
+  utm_medium VARCHAR(100),
+  utm_campaign VARCHAR(100),
+  utm_content VARCHAR(100),
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS tracking_events (
+  id SERIAL PRIMARY KEY,
+  tracking_link_id VARCHAR(255) REFERENCES tracking_links(id),
+  event_type VARCHAR(50) NOT NULL, -- 'view', 'click', 'checkout_start', 'purchase'
+  order_id VARCHAR(255), -- If purchase
+  metadata JSONB,
+  ip VARCHAR(50),
+  user_agent TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Update orders to link to tracking
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS tracking_id VARCHAR(255) REFERENCES tracking_links(id);
+CREATE TABLE IF NOT EXISTS seats (
+  id VARCHAR(255) PRIMARY KEY,
+  event_id VARCHAR(255) REFERENCES events(id),
+  ticket_type_id VARCHAR(255) REFERENCES ticket_types(id),
+  label VARCHAR(50) NOT NULL, -- ex: "A1"
+  status VARCHAR(50) DEFAULT 'available', -- 'available', 'reserved', 'occupied'
+  x INTEGER NOT NULL,
+  y INTEGER NOT NULL,
+  radius INTEGER DEFAULT 10,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS waitlist (
+  id SERIAL PRIMARY KEY,
+  event_id VARCHAR(255) REFERENCES events(id),
+  ticket_type_id VARCHAR(255) REFERENCES ticket_types(id),
+  user_id VARCHAR(255),
+  name VARCHAR(255),
+  email VARCHAR(255),
+  status VARCHAR(50) DEFAULT 'waiting', -- 'waiting', 'notified', 'converted', 'expired'
+  notified_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Update tickets to link to seats
+ALTER TABLE tickets ADD COLUMN IF NOT EXISTS seat_id VARCHAR(255) REFERENCES seats(id);
+CREATE TABLE IF NOT EXISTS physical_products (
+  id VARCHAR(255) PRIMARY KEY,
+  event_id VARCHAR(255) REFERENCES events(id),
+  name VARCHAR(255) NOT NULL,
+  sku VARCHAR(100) NOT NULL,
+  weight_kg DECIMAL(10,2),
+  fulfillment_provider VARCHAR(50) DEFAULT 'manual', -- 'amazon', 'bling', 'webhook', 'manual'
+  fulfillment_config JSONB,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS order_shipping (
+  id SERIAL PRIMARY KEY,
+  order_id VARCHAR(255) REFERENCES orders(id),
+  physical_product_id VARCHAR(255) REFERENCES physical_products(id),
+  address_line1 TEXT NOT NULL,
+  address_line2 TEXT,
+  city VARCHAR(100) NOT NULL,
+  state VARCHAR(50) NOT NULL,
+  zip_code VARCHAR(20) NOT NULL,
+  tracking_code VARCHAR(100),
+  status VARCHAR(50) DEFAULT 'pending', -- 'pending', 'shipped', 'delivered', 'error'
+  fulfillment_order_id VARCHAR(255),
+  error_message TEXT,
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Update ticket_types to link to physical products
+ALTER TABLE ticket_types ADD COLUMN IF NOT EXISTS physical_product_id VARCHAR(255) REFERENCES physical_products(id);
+CREATE TABLE IF NOT EXISTS event_suppliers (
+  id VARCHAR(255) PRIMARY KEY,
+  event_id VARCHAR(255) REFERENCES events(id),
+  name VARCHAR(255) NOT NULL,
+  category VARCHAR(100),
+  contact_info VARCHAR(255),
+  estimated_amount DECIMAL(10,2) DEFAULT 0,
+  actual_amount DECIMAL(10,2) DEFAULT 0,
+  payment_date DATE,
+  status VARCHAR(50) DEFAULT 'proposed', -- 'proposed', 'confirmed', 'paid'
   created_at TIMESTAMP DEFAULT NOW()
 );
 `;

@@ -45,3 +45,8 @@ export async function clearOfflineLogs() {
   const db = await initDB();
   await db.clear(STORE_LOGS);
 }
+
+export async function countOfflineLogs() {
+  const db = await initDB();
+  return db.count(STORE_LOGS);
+}

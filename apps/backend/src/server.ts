@@ -42,6 +42,15 @@ import uploadRoutes from "./routes/upload.routes";
 
 // ... existing code ...
 
+import facialRoutes from "./routes/facial.routes";
+import trackingRoutes from "./routes/tracking.routes";
+import publicRoutes from "./routes/public.routes";
+import staticRoutes from "./routes/static.routes";
+import seatRoutes from "./routes/seat.routes";
+import waitlistRoutes from "./routes/waitlist.routes";
+import physicalRoutes from "./routes/physical.routes";
+import planningRoutes from "./routes/planning.routes";
+
 server.register(authRoutes, { prefix: "/api/auth" });
 server.register(accountRoutes, { prefix: "/api/accounts" });
 server.register(uploadRoutes, { prefix: "/api/uploads" });
@@ -49,6 +58,14 @@ server.register(eventRoutes, { prefix: "/api/events" });
 server.register(ticketRoutes, { prefix: "/api/tickets" });
 server.register(webhookRoutes, { prefix: "/api/webhooks" });
 server.register(checkinRoutes, { prefix: "/api/checkin" });
+server.register(facialRoutes, { prefix: "/api/facial" });
+server.register(trackingRoutes, { prefix: "/api/tracking" });
+server.register(publicRoutes, { prefix: "/api/public" });
+server.register(seatRoutes, { prefix: "/api/seats" });
+server.register(waitlistRoutes, { prefix: "/api/waitlist" });
+server.register(physicalRoutes, { prefix: "/api/physical" });
+server.register(planningRoutes, { prefix: "/api/planning" });
+server.register(staticRoutes);
 
 server.get("/health", async () => ({ status: "ok" }));
 

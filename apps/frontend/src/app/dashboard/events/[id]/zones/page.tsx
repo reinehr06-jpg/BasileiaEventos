@@ -17,27 +17,19 @@ export default function ZonesPage({ params }: { params: Promise<{ id: string }> 
   }, [eventId]);
 
   const loadZones = async () => {
-    // We'll need to add listZones to the API
-    const res = await fetch(`/api/events/${eventId}/zones`, { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } });
-    if (res.ok) setZones(await res.json());
+    const data = await eventApi.listZones(eventId);
+    setZones(data);
   };
-
+  
   const handleCreateZone = async (e: React.FormEvent) => {
     e.preventDefault();
-    await fetch(`/api/events/${eventId}/zones`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("token")}` },
-      body: JSON.stringify(newZone)
-    });
+    await eventApi.createZone(eventId, newZone);
     setNewZone({ name: "", description: "" });
     loadZones();
   };
-
+  
   const toggleZoneOnType = async (typeId: string, zoneId: string) => {
-    await fetch(`/api/tickets/types/${typeId}/zones/${zoneId}`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-    });
+    await ticketApi.toggleZone(typeId, zoneId);
     loadZones();
   };
 

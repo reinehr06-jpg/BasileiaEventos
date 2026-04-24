@@ -22,7 +22,7 @@ export default function TicketManagementPage({ params }: { params: Promise<{ id:
     e.preventDefault();
     await ticketApi.createType({ ...newType, event_id: eventId });
     setNewType({ name: "", price: 0, quantity: 0 });
-    loadTypes();
+    setTimeout(loadTypes, 300);
   };
 
   return (
@@ -96,7 +96,7 @@ function LotSection({ typeId }: { typeId: string }) {
     <div className="mt-4 border-t pt-4">
       <h4 className="font-semibold text-sm mb-2">Lotes</h4>
       <div className="space-y-2 mb-4">
-        {lots.map(lot => (
+        {Array.isArray(lots) && lots.map(lot => (
           <div key={lot.id} className="text-xs bg-gray-50 p-2 rounded flex justify-between">
             <span>{lot.name} (R$ {lot.price})</span>
             <span className="text-gray-500">{lot.sold}/{lot.quantity}</span>

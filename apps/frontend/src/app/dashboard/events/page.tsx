@@ -30,9 +30,10 @@ export default function EventsPage() {
                 {event.status}
               </span>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-4">
               <Link href={`/dashboard/events/${event.id}`} className="text-blue-600 hover:underline">Editar</Link>
               <Link href={`/dashboard/events/${event.id}/tickets`} className="text-green-600 hover:underline">Ingressos</Link>
+              <Link href={`/dashboard/events/${event.id}/zones`} className="text-purple-600 hover:underline">Zonas</Link>
             </div>
           </div>
         ))}

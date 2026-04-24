@@ -55,10 +55,12 @@ function DashboardContent() {
             <div className="text-2xl font-bold">{data.stats.total_capacity - data.stats.entries}</div>
             <p className="text-xs text-gray-500 mt-1">de {data.stats.total_capacity}</p>
           </div>
-          <div className="bg-gray-800 p-6 rounded-2xl shadow-xl border border-red-900/30">
+          <div className={`bg-gray-800 p-6 rounded-2xl shadow-xl border ${data.stats.fraud_alerts > 0 ? 'border-red-500 animate-pulse' : 'border-red-900/30'}`}>
             <h3 className="text-red-400 text-sm mb-2">Alertas de Fraude</h3>
-            <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-gray-500 mt-1">Nenhuma suspeita detectada</p>
+            <div className="text-2xl font-bold">{data.stats.fraud_alerts || 0}</div>
+            <p className="text-xs text-gray-500 mt-1">
+              {data.stats.fraud_alerts > 0 ? 'Atenção: Verifique os logs' : 'Nenhuma suspeita detectada'}
+            </p>
           </div>
         </div>
 
@@ -69,14 +71,19 @@ function DashboardContent() {
           </div>
           <div className="divide-y divide-gray-700">
             {data.recentEntries.map((entry: any, i: number) => (
-              <div key={i} className="p-4 flex justify-between items-center hover:bg-gray-700/50 transition-colors">
+              <div key={i} className={`p-4 flex justify-between items-center hover:bg-gray-700/50 transition-colors ${entry.status === 'fraud' ? 'bg-red-900/20' : ''}`}>
                 <div>
                   <p className="font-bold">{entry.code}</p>
                   <p className="text-xs text-gray-400">{entry.type_name}</p>
+                  {entry.message && <p className="text-[10px] text-red-400 mt-1 font-bold">{entry.message}</p>}
                 </div>
                 <div className="text-right">
-                  <p className={`text-sm font-bold ${entry.status === 'valid' ? 'text-green-400' : 'text-yellow-400'}`}>
-                    {entry.status === 'valid' ? 'SUCESSO' : 'REPETIDO'}
+                  <p className={`text-sm font-bold ${
+                    entry.status === 'valid' ? 'text-green-400' : 
+                    entry.status === 'fraud' ? 'text-red-500' : 'text-yellow-400'
+                  }`}>
+                    {entry.status === 'valid' ? 'SUCESSO' : 
+                     entry.status === 'fraud' ? 'FRAUDE' : 'REPETIDO'}
                   </p>
                   <p className="text-xs text-gray-500">{new Date(entry.created_at).toLocaleTimeString()}</p>
                 </div>
