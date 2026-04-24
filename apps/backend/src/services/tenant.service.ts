@@ -241,6 +241,119 @@ CREATE TABLE IF NOT EXISTS chatbot_conversations (
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS ticket_templates (
+  id VARCHAR(255) PRIMARY KEY,
+  event_id VARCHAR(255) REFERENCES events(id),
+  image_url VARCHAR(255),
+  config JSONB,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS ticket_transfers (
+  id VARCHAR(255) PRIMARY KEY,
+  ticket_id VARCHAR(255) REFERENCES tickets(id),
+  sender_id VARCHAR(255),
+  receiver_email VARCHAR(255),
+  token VARCHAR(255),
+  status VARCHAR(50) DEFAULT 'pending',
+  expires_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS event_benefits (
+  id VARCHAR(255) PRIMARY KEY,
+  event_id VARCHAR(255) REFERENCES events(id),
+  type VARCHAR(50),
+  content TEXT,
+  min_checkin BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS wallet_passes (
+  id VARCHAR(255) PRIMARY KEY,
+  ticket_id VARCHAR(255) REFERENCES tickets(id),
+  pass_type VARCHAR(50) NOT NULL,
+  push_token VARCHAR(255),
+  device_library_identifier VARCHAR(255),
+  status VARCHAR(50) DEFAULT 'active',
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS organizer_profiles (
+  id VARCHAR(255) PRIMARY KEY,
+  name VARCHAR(255),
+  slug VARCHAR(255) UNIQUE,
+  bio TEXT,
+  avatar_url VARCHAR(255),
+  social_links JSONB,
+  verified BOOLEAN DEFAULT false,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS followers (
+  id SERIAL PRIMARY KEY,
+  organizer_id VARCHAR(255) REFERENCES organizer_profiles(id),
+  user_id VARCHAR(255),
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS event_reviews (
+  id VARCHAR(255) PRIMARY KEY,
+  event_id VARCHAR(255) REFERENCES events(id),
+  user_id VARCHAR(255),
+  rating INTEGER CHECK (rating >= 1 AND rating <= 5),
+  comment TEXT,
+  organizer_reply TEXT,
+  status VARCHAR(50) DEFAULT 'published',
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS referral_codes (
+  id VARCHAR(255) PRIMARY KEY,
+  user_id VARCHAR(255),
+  code VARCHAR(50) UNIQUE,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS buyer_wallets (
+  id VARCHAR(255) PRIMARY KEY,
+  user_id VARCHAR(255),
+  balance DECIMAL(10,2) DEFAULT 0,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS wallet_transactions (
+  id VARCHAR(255) PRIMARY KEY,
+  wallet_id VARCHAR(255) REFERENCES buyer_wallets(id),
+  amount DECIMAL(10,2),
+  type VARCHAR(50), -- 'credit', 'debit'
+  expires_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS invites (
+  id VARCHAR(255) PRIMARY KEY,
+  email VARCHAR(255),
+  role VARCHAR(50),
+  token VARCHAR(255) UNIQUE,
+  status VARCHAR(50) DEFAULT 'pending',
+  expires_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS event_landing_pages (
+  id VARCHAR(255) PRIMARY KEY,
+  event_id VARCHAR(255) REFERENCES events(id),
+  config JSONB,
+  content JSONB,
+  published BOOLEAN DEFAULT false,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+ALTER TABLE events ADD COLUMN IF NOT EXISTS is_ai_page_paid BOOLEAN DEFAULT false;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS fee_config JSONB DEFAULT '{"mode": "pass", "percentage": 10, "fixed": 0}';
 `;
 
 export async function createTenantDatabase(dbName: string) {

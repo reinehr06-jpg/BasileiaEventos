@@ -51,6 +51,12 @@ import waitlistRoutes from "./routes/waitlist.routes";
 import physicalRoutes from "./routes/physical.routes";
 import planningRoutes from "./routes/planning.routes";
 import aiRoutes from "./routes/ai.routes";
+import walletRoutes from "./routes/wallet.routes";
+import communityRoutes from "./routes/community.routes";
+import aiBuilderRoutes from "./routes/ai-builder.routes";
+import analyticsRoutes from "./routes/analytics.routes";
+import billingRoutes from "./routes/billing.routes";
+import marketplaceRoutes from "./routes/marketplace.routes";
 
 server.register(authRoutes, { prefix: "/api/auth" });
 server.register(accountRoutes, { prefix: "/api/accounts" });
@@ -67,6 +73,12 @@ server.register(waitlistRoutes, { prefix: "/api/waitlist" });
 server.register(physicalRoutes, { prefix: "/api/physical" });
 server.register(planningRoutes, { prefix: "/api/planning" });
 server.register(aiRoutes, { prefix: "/api/ai" });
+server.register(walletRoutes, { prefix: "/api/wallet" });
+server.register(communityRoutes, { prefix: "/api/community" });
+server.register(aiBuilderRoutes, { prefix: "/api/ai-builder" });
+server.register(analyticsRoutes, { prefix: "/api/analytics" });
+server.register(billingRoutes, { prefix: "/api/billing" });
+server.register(marketplaceRoutes, { prefix: "/api/marketplace" });
 server.register(staticRoutes);
 
 server.get("/health", async () => ({ status: "ok" }));
