@@ -47,3 +47,26 @@ CREATE TABLE IF NOT EXISTS tickets (
   status VARCHAR(50) DEFAULT 'active',
   created_at TIMESTAMP DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS ticket_lots (
+  id VARCHAR(255) PRIMARY KEY,
+  ticket_type_id VARCHAR(255) REFERENCES ticket_types(id),
+  name VARCHAR(255) NOT NULL,
+  price DECIMAL(10,2) NOT NULL,
+  quantity INTEGER NOT NULL,
+  sold INTEGER DEFAULT 0,
+  active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS audit_logs (
+  id SERIAL PRIMARY KEY,
+  account_id VARCHAR(255),
+  user_id VARCHAR(255),
+  action VARCHAR(255) NOT NULL,
+  entity_type VARCHAR(50),
+  entity_id VARCHAR(255),
+  old_data JSONB,
+  new_data JSONB,
+  created_at TIMESTAMP DEFAULT NOW()
+);

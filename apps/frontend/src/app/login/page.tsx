@@ -13,7 +13,7 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const data = await authApi.login({ email, password });
+      const data = await authApi.login(email, password);
       localStorage.setItem("token", data.token);
       router.push("/dashboard");
     } catch (err: any) {

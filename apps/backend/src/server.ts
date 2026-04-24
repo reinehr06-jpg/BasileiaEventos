@@ -1,3 +1,4 @@
+import "dotenv/config";
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import jwt from "@fastify/jwt";
@@ -5,6 +6,10 @@ import multipart from "@fastify/multipart";
 import { PrismaClient } from "@prisma/client";
 import authRoutes from "./routes/auth.routes";
 import accountRoutes from "./routes/account.routes";
+import eventRoutes from "./routes/event.routes";
+import ticketRoutes from "./routes/ticket.routes";
+import webhookRoutes from "./routes/webhook.routes";
+import checkinRoutes from "./routes/checkin.routes";
 import { authenticate } from "./utils/auth";
 
 declare module "@fastify/jwt" {
@@ -40,6 +45,10 @@ import uploadRoutes from "./routes/upload.routes";
 server.register(authRoutes, { prefix: "/api/auth" });
 server.register(accountRoutes, { prefix: "/api/accounts" });
 server.register(uploadRoutes, { prefix: "/api/uploads" });
+server.register(eventRoutes, { prefix: "/api/events" });
+server.register(ticketRoutes, { prefix: "/api/tickets" });
+server.register(webhookRoutes, { prefix: "/api/webhooks" });
+server.register(checkinRoutes, { prefix: "/api/checkin" });
 
 server.get("/health", async () => ({ status: "ok" }));
 
