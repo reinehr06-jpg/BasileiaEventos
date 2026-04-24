@@ -108,7 +108,7 @@ export default async function communityRoutes(server: FastifyInstance) {
     const db = await getTenantConnection(user.accountId);
     try {
       const walletRes = await db.query("SELECT balance FROM buyer_wallets WHERE user_id = $1", [user.id]);
-      const balance = walletRes.rowCount > 0 ? walletRes.rows[0].balance : 0;
+      const balance = (walletRes.rowCount || 0) > 0 ? walletRes.rows[0].balance : 0;
       
       const transactionsRes = await db.query(
         "SELECT * FROM wallet_transactions wt JOIN buyer_wallets bw ON wt.wallet_id = bw.id WHERE bw.user_id = $1 ORDER BY wt.created_at DESC",

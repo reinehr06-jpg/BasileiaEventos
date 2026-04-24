@@ -13,12 +13,12 @@ export default async function analyticsRoutes(server: FastifyInstance) {
       const eventsRes = await db.query("SELECT COUNT(*) as active_events FROM events WHERE status = 'active'");
       
       // 2. Sales by Day (Last 30 days)
-      const salesByDayRes = await db.query(\`
+      const salesByDayRes = await db.query(`
         SELECT DATE_TRUNC('day', created_at) as day, SUM(total) as revenue, COUNT(*) as volume
         FROM orders 
         WHERE status = 'paid' AND created_at > NOW() - INTERVAL '30 days'
         GROUP BY 1 ORDER BY 1
-      \`);
+      `);
 
       // 3. Peak Hours Heatmap (Mocked data for demo)
       const peakHours = [
@@ -46,22 +46,22 @@ export default async function analyticsRoutes(server: FastifyInstance) {
     const user = request.user;
     const db = await getTenantConnection(user.accountId);
     try {
-      const breakdownRes = await db.query(\`
+      const breakdownRes = await db.query(`
         SELECT tt.name as type, COUNT(t.id) as count, SUM(tt.price) as revenue
         FROM tickets t 
         JOIN ticket_types tt ON t.ticket_type_id = tt.id
         WHERE tt.event_id = $1
         GROUP BY 1
-      \`, [id]);
+      `, [id]);
 
-      const conversionRes = await db.query(\`
+      const conversionRes = await db.query(`
         SELECT utm_source, COUNT(*) as clicks, 
           (SELECT COUNT(*) FROM orders o WHERE o.tracking_id = tl.id AND o.status = 'paid') as conversions
         FROM tracking_links tl
         JOIN tracking_events te ON te.tracking_link_id = tl.id
         WHERE tl.event_id = $1
         GROUP BY 1, tl.id
-      \`, [id]);
+      `, [id]);
 
       return {
         breakdown: breakdownRes.rows,

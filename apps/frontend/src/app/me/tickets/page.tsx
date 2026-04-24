@@ -37,11 +37,11 @@ export default function MyTicketsPage() {
     try {
       // In real life, trigger a download
       alert("Baixando arquivo .pkpass...");
-      const res = await api.get(\`/wallet/\${ticketId}/apple\`, { responseType: 'blob' });
+      const res = await api.get(`/wallet/\${ticketId}/apple`, { responseType: 'blob' });
       // const url = window.URL.createObjectURL(new Blob([res.data]));
       // const link = document.createElement('a');
       // link.href = url;
-      // link.setAttribute('download', \`ticket-\${ticketId}.pkpass\`);
+      // link.setAttribute('download', `ticket-\${ticketId}.pkpass`);
       // document.body.appendChild(link);
       // link.click();
     } catch (error) {
@@ -52,7 +52,7 @@ export default function MyTicketsPage() {
 
   const handleGoogleWallet = async (ticketId: string) => {
     try {
-      const res = await api.post(\`/wallet/\${ticketId}/google\`);
+      const res = await api.post(`/wallet/\${ticketId}/google`);
       window.open(res.data.url, "_blank");
     } catch (error) {
       console.error(error);

@@ -14,11 +14,11 @@ export default async function walletRoutes(server: FastifyInstance) {
     try {
       // 1. Verify ticket exists
       const ticketRes = await db.query(
-        \`SELECT t.*, e.title as event_title, e.start_date, tt.name as type_name
+        `SELECT t.*, e.title as event_title, e.start_date, tt.name as type_name
          FROM tickets t 
          JOIN ticket_types tt ON t.ticket_type_id = tt.id
          JOIN events e ON tt.event_id = e.id
-         WHERE t.id = $1 AND t.user_id = $2\`,
+         WHERE t.id = $1 AND t.user_id = $2`,
         [ticketId, user.id]
       );
       
@@ -31,8 +31,8 @@ export default async function walletRoutes(server: FastifyInstance) {
       // 2. Track in wallet_passes
       const passId = randomUUID();
       await db.query(
-        \`INSERT INTO wallet_passes (id, ticket_id, pass_type, status)
-         VALUES ($1, $2, $3, $4)\`,
+        `INSERT INTO wallet_passes (id, ticket_id, pass_type, status)
+         VALUES ($1, $2, $3, $4)`,
         [passId, ticketId, 'apple', 'active']
       );
       
@@ -46,7 +46,7 @@ export default async function walletRoutes(server: FastifyInstance) {
       const mockPkpassBuffer = Buffer.from("MOCK_PKPASS_FILE_CONTENT_FOR_" + ticketId);
       
       reply.header('Content-Type', 'application/vnd.apple.pkpass');
-      reply.header('Content-Disposition', \`attachment; filename="ticket-\${ticketId}.pkpass"\`);
+      reply.header('Content-Disposition', `attachment; filename="ticket-${ticketId}.pkpass"`);
       return reply.send(mockPkpassBuffer);
       
     } finally {
@@ -74,13 +74,13 @@ export default async function walletRoutes(server: FastifyInstance) {
       
       const passId = randomUUID();
       await db.query(
-        \`INSERT INTO wallet_passes (id, ticket_id, pass_type, status)
-         VALUES ($1, $2, $3, $4)\`,
+        `INSERT INTO wallet_passes (id, ticket_id, pass_type, status)
+         VALUES ($1, $2, $3, $4)`,
         [passId, ticketId, 'google', 'active']
       );
       
       // MOCK: Generate Google Wallet link using Google Wallet API
-      const saveUrl = \`https://pay.google.com/gp/v/save/MOCK_JWT_FOR_TICKET_\${ticketId}\`;
+      const saveUrl = `https://pay.google.com/gp/v/save/MOCK_JWT_FOR_TICKET_${ticketId}`;
       
       return reply.send({ url: saveUrl });
     } finally {

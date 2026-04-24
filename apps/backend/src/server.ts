@@ -57,6 +57,31 @@ import aiBuilderRoutes from "./routes/ai-builder.routes";
 import analyticsRoutes from "./routes/analytics.routes";
 import billingRoutes from "./routes/billing.routes";
 import marketplaceRoutes from "./routes/marketplace.routes";
+import publicApiRoutes from "./routes/public-api.routes";
+import adminRoutes from "./routes/admin.routes";
+import venueRoutes from "./routes/venue.routes";
+import swagger from "@fastify/swagger";
+import swaggerUi from "@fastify/swagger-ui";
+import rateLimit from "@fastify/rate-limit";
+
+// Rate Limit Config
+server.register(rateLimit, {
+  max: 100,
+  timeWindow: "1 minute"
+});
+
+// Swagger Config
+server.register(swagger, {
+  openapi: {
+    info: { title: "Basileia Eventos API", version: "1.0.0" },
+    components: {
+      securitySchemes: {
+        apiKey: { type: "apiKey", name: "X-API-Key", in: "header" }
+      }
+    }
+  }
+});
+server.register(swaggerUi, { routePrefix: "/docs" });
 
 server.register(authRoutes, { prefix: "/api/auth" });
 server.register(accountRoutes, { prefix: "/api/accounts" });
@@ -79,6 +104,9 @@ server.register(aiBuilderRoutes, { prefix: "/api/ai-builder" });
 server.register(analyticsRoutes, { prefix: "/api/analytics" });
 server.register(billingRoutes, { prefix: "/api/billing" });
 server.register(marketplaceRoutes, { prefix: "/api/marketplace" });
+server.register(publicApiRoutes, { prefix: "/api/v1" });
+server.register(adminRoutes, { prefix: "/api/admin" });
+server.register(venueRoutes, { prefix: "/api/venues" });
 server.register(staticRoutes);
 
 server.get("/health", async () => ({ status: "ok" }));
